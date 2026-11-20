@@ -6,11 +6,24 @@ async function startBot() {
     const sock = makeWASocket({
         logger: pino({ level: 'silent' }),
         auth: state,
-        printQRInTerminal: true,
+        printQRInTerminal: false,
         browser: ['MY-BOT', 'Chrome', '1.0']
     });
 
     sock.ev.on('creds.update', saveCreds);
+
+    if (!sock.authState.creds.registered) {
+        const phoneNumber = '94705030185';
+        setTimeout(async () => {
+            try {
+                const code = await sock.requestPairingCode(phoneNumber);
+                console.log('👉 PAIRING CODE: ' + code);
+                console.log('👉 මේ Code එක WhatsApp එකේ ගහපන්!');
+            } catch (e) {
+                console.log('Pairing Code Error:', e);
+            }
+        }, 3000);
+    }
 
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect } = update;
